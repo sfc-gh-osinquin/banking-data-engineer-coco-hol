@@ -1,0 +1,24 @@
+{
+  "de-04": [
+    {
+      "label": "SQL to review",
+      "path": "transform_before.sql",
+      "language": "sql",
+      "content": "-- Intentionally flawed read-only exercise, not production code.\n-- Find SELECT *, hidden date cutoff and inconsistent alias conventions.\nSELECT *, AMOUNT AS amt\nFROM HOL_BANKING_DE.SOURCE.TRANSACTIONS\nWHERE TRANSACTION_TIME >= '2026-01-01' AND STATUS = 'COMPLETED';\n"
+    },
+    {
+      "label": "Recovery checkpoint (answer key)",
+      "path": "transform_checkpoint.sql",
+      "language": "sql",
+      "content": "-- Reviewed checkpoint: explicit window and customer grain; no persisted writes.\nSET REPORT_START = '2025-03-30';\nSET REPORT_END_EXCLUSIVE = '2026-10-01';\nSELECT CUSTOMER_ID, SUM(AMOUNT) AS NET_SPEND\nFROM HOL_BANKING_DE.SOURCE.TRANSACTIONS\nWHERE STATUS = 'COMPLETED'\n  AND TRANSACTION_TIME >= TO_TIMESTAMP_NTZ($REPORT_START)\n  AND TRANSACTION_TIME < TO_TIMESTAMP_NTZ($REPORT_END_EXCLUSIVE)\nGROUP BY CUSTOMER_ID\nORDER BY NET_SPEND DESC, CUSTOMER_ID;\n"
+    }
+  ],
+  "de-05": [
+    {
+      "label": "Demo hook (facilitator)",
+      "path": "guard_demo.py",
+      "language": "python",
+      "content": "\"\"\"Fixture-only PreToolUse demonstration. NOT a SQL parser/security boundary.\"\"\"\nimport json\nimport re\nimport sys\n\n\ndef decision(payload):\n    if not isinstance(payload, dict) or payload.get(\"hook_event_name\") != \"PreToolUse\":\n        return False, \"Malformed or unsupported demonstration payload\"\n    tool_input = payload.get(\"tool_input\")\n    if not isinstance(tool_input, dict):\n        return False, \"Missing tool_input\"\n    sql = tool_input.get(\"sql\")\n    if payload.get(\"tool_name\") not in {\"sql_execute\", \"snowflake_sql_execute\"} or not isinstance(sql, str) or not sql.strip():\n        return False, \"This fixture only demonstrates SQL tool inputs\"\n    if re.search(r\"\\bPROD_SIM\\b\", sql, re.IGNORECASE):\n        return False, \"Demonstration denied: sandbox PROD_SIM marker\"\n    return True, \"No demonstration marker found; RBAC still governs actual execution\"\n\n\ndef main():\n    try:\n        payload = json.load(sys.stdin)\n    except (ValueError, TypeError):\n        payload = None\n    allowed, reason = decision(payload)\n    print(json.dumps({\"decision\": \"allow\" if allowed else \"block\", \"reason\": reason}))\n    return 0 if allowed else 2\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n"
+    }
+  ]
+}

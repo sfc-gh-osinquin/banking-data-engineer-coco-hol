@@ -1,0 +1,14 @@
+{
+  "title": "Banking Data Engineering Cortex Code Lab",
+  "scenario": "Build a repeatable, reviewed customer net-spend transformation over synthetic retail-banking card and account transactions.",
+  "outcome": "Participants leave able to repeat one real workflow on their own data, with a clear next step",
+  "track_label": "Data Engineering",
+  "interface_label": "in Snowsight",
+  "database": "HOL_BANKING_DE",
+  "schema": "P001",
+  "role": "HOL_BANKING_PARTICIPANT",
+  "warehouse": "HOL_BANKING_WH",
+  "zip": "banking-data-engineer-coco-hol-data.zip",
+  "expected_text": "LOCATIONS 5 rows, CUSTOMERS 100 rows, TRANSACTIONS 1200 rows; NET_SPEND 339300.29.",
+  "interface_notes": "- Open a Workspace, then Cortex Code in the lower-right corner. Use Plan mode before multi-step work.\n- Personal skills live in `.snowflake/cortex/skills/<name>/SKILL.md` in that workspace (+ Create Skill, then paste the starter from the lab step page).\n- Plugins, local hooks and custom subagent files are shown by the facilitator from Desktop/CLI.\n- **Trial accounts:** each participant runs `admin/setup.sql` in their own trial as the account owner before the lab, then switches to the participant role."
+}
